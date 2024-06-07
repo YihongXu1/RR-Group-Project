@@ -112,6 +112,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#loading" id="toc-loading" class="nav-link" data-scroll-target="#loading"><span class="header-section-number">2.1</span> Loading</a></li>
   <li><a href="#cleaning" id="toc-cleaning" class="nav-link" data-scroll-target="#cleaning"><span class="header-section-number">2.2</span> Cleaning</a></li>
   </ul></li>
+  <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model"><span class="header-section-number">3</span> Model</a>
+  <ul class="collapse">
+  <li><a href="#naivebayes" id="toc-naivebayes" class="nav-link" data-scroll-target="#naivebayes"><span class="header-section-number">3.1</span> NaiveBayes</a></li>
+  <li><a href="#bayesnet" id="toc-bayesnet" class="nav-link" data-scroll-target="#bayesnet"><span class="header-section-number">3.2</span> BayesNet</a></li>
+  <li><a href="#svm" id="toc-svm" class="nav-link" data-scroll-target="#svm"><span class="header-section-number">3.3</span> SVM</a></li>
+  <li><a href="#random-forest" id="toc-random-forest" class="nav-link" data-scroll-target="#random-forest"><span class="header-section-number">3.4</span> Random Forest</a></li>
+  <li><a href="#decision-tree-c4.5" id="toc-decision-tree-c4.5" class="nav-link" data-scroll-target="#decision-tree-c4.5"><span class="header-section-number">3.5</span> Decision Tree (C4.5)</a></li>
+  <li><a href="#knn" id="toc-knn" class="nav-link" data-scroll-target="#knn"><span class="header-section-number">3.6</span> kNN</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">4</span> Summary</a></li>
   </ul>
 </nav>
 </div>
@@ -501,6 +511,368 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
+</section>
+<section id="model" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Model</h1>
+<p>In this part, we managed to reproduce the result in the papar <a href="https://dergipark.org.tr/en/pub/jauist/issue/55760/748667">Classification of Covid-19 Dataset with Some Machine Learning Methods</a>. machine learning classifier methods are considered:</p>
+<ul>
+<li><p>NaiveBayes</p></li>
+<li><p>BayesNet</p></li>
+<li><p>SVM</p></li>
+<li><p>Random Forest</p></li>
+<li><p>Decision Tree</p></li>
+<li><p>KNN</p></li>
+</ul>
+<p>For each model, we calculate the confusion matrix to get accuracy, precision, recall and F1 score as summarized in the original paper. 10-fold cross validation is applied for each model. Related model file are save to the file <code>model/*</code>.</p>
+<section id="naivebayes" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="naivebayes"><span class="header-section-number">3.1</span> NaiveBayes</h2>
+<p>NaiveBayes assumes all variables are independent from each other. By experience, it works relatively well even if the assumptions are not met.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(df_agefac) <span class="co"># use factorized age version </span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(seed)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>model_nb <span class="ot">&lt;-</span> <span class="fu">nb</span>(<span class="st">'y'</span>, df)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>model_nb <span class="ot">&lt;-</span> <span class="fu">lp</span>(model_nb, df, <span class="at">smooth =</span> <span class="dv">1</span>) <span class="co"># learn parameter</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cv</span>(model_nb, df, <span class="at">k =</span> <span class="dv">10</span>) <span class="co"># cross validation</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>pred_nb <span class="ot">&lt;-</span> <span class="fu">predict</span>(model_nb, df)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(pred_nb, df<span class="sc">$</span>y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction live  die
+      live 8363  861
+      die   499  468
+                                          
+               Accuracy : 0.8665          
+                 95% CI : (0.8598, 0.8731)
+    No Information Rate : 0.8696          
+    P-Value [Acc &gt; NIR] : 0.8231          
+                                          
+                  Kappa : 0.3346          
+                                          
+ Mcnemar's Test P-Value : &lt;2e-16          
+                                          
+            Sensitivity : 0.9437          
+            Specificity : 0.3521          
+         Pos Pred Value : 0.9067          
+         Neg Pred Value : 0.4840          
+             Prevalence : 0.8696          
+         Detection Rate : 0.8206          
+   Detection Prevalence : 0.9051          
+      Balanced Accuracy : 0.6479          
+                                          
+       'Positive' Class : live            
+                                          </code></pre>
+</div>
+</div>
+</section>
+<section id="bayesnet" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="bayesnet"><span class="header-section-number">3.2</span> BayesNet</h2>
+<p>Different from Naive Bayes, Bayes net define a complicated network structure which indicate relationships among a set of features. The assumption makes sense but is more time-consuming than NaiveBayes Model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(seed)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>model_bn <span class="ot">&lt;-</span> <span class="fu">tan_cl</span>(<span class="st">'y'</span>, df, <span class="at">score =</span> <span class="st">'aic'</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>model_bn <span class="ot">&lt;-</span> <span class="fu">lp</span>(model_bn, df, <span class="at">smooth =</span> <span class="dv">1</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cv</span>(model_bn, df, <span class="at">k =</span> <span class="dv">10</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>pred_bn <span class="ot">&lt;-</span> <span class="fu">predict</span>(model_bn, df)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(pred_bn, df<span class="sc">$</span>y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction live  die
+      live 8604  961
+      die   258  368
+                                          
+               Accuracy : 0.8804          
+                 95% CI : (0.8739, 0.8866)
+    No Information Rate : 0.8696          
+    P-Value [Acc &gt; NIR] : 0.0005642       
+                                          
+                  Kappa : 0.3197          
+                                          
+ Mcnemar's Test P-Value : &lt; 2.2e-16       
+                                          
+            Sensitivity : 0.9709          
+            Specificity : 0.2769          
+         Pos Pred Value : 0.8995          
+         Neg Pred Value : 0.5879          
+             Prevalence : 0.8696          
+         Detection Rate : 0.8443          
+   Detection Prevalence : 0.9386          
+      Balanced Accuracy : 0.6239          
+                                          
+       'Positive' Class : live            
+                                          </code></pre>
+</div>
+</div>
+</section>
+<section id="svm" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="svm"><span class="header-section-number">3.3</span> SVM</h2>
+<p>Support Vector Machine (SVM) aim to find the hyperplane with the largest margin to classify data points. Kernel trick is applied here to improve accuracy. We use radial basis kernel.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(df_ageori)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(seed)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>train_control <span class="ot">&lt;-</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">"cv"</span>, <span class="at">number =</span> <span class="dv">10</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>model_svm <span class="ot">&lt;-</span> <span class="fu">train</span>(y <span class="sc">~</span> ., <span class="at">data =</span> df, <span class="at">method =</span> <span class="st">"svmRadial"</span>, <span class="at">trControl =</span> train_control)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>pred_svm <span class="ot">&lt;-</span> <span class="fu">predict</span>(model_svm, df)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(pred_svm, df<span class="sc">$</span>y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction live  die
+      live 8862 1329
+      die     0    0
+                                          
+               Accuracy : 0.8696          
+                 95% CI : (0.8629, 0.8761)
+    No Information Rate : 0.8696          
+    P-Value [Acc &gt; NIR] : 0.5073          
+                                          
+                  Kappa : 0               
+                                          
+ Mcnemar's Test P-Value : &lt;2e-16          
+                                          
+            Sensitivity : 1.0000          
+            Specificity : 0.0000          
+         Pos Pred Value : 0.8696          
+         Neg Pred Value :    NaN          
+             Prevalence : 0.8696          
+         Detection Rate : 0.8696          
+   Detection Prevalence : 1.0000          
+      Balanced Accuracy : 0.5000          
+                                          
+       'Positive' Class : live            
+                                          </code></pre>
+</div>
+</div>
+</section>
+<section id="random-forest" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="random-forest"><span class="header-section-number">3.4</span> Random Forest</h2>
+<p>Random Forest (RF) is consisted of a set of decision trees. Each tree is a weak classifier trained with only a subset of data and features. RF is actually a ensemble learning method.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(seed)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(df_ageori)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>train_control <span class="ot">&lt;-</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">"cv"</span>, <span class="at">number =</span> <span class="dv">10</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>model_rf <span class="ot">&lt;-</span> <span class="fu">train</span>(y <span class="sc">~</span> ., <span class="at">data =</span> df, <span class="at">method =</span> <span class="st">"rf"</span>, <span class="at">trControl =</span> train_control)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>pred_rf <span class="ot">&lt;-</span> <span class="fu">predict</span>(model_rf, df)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(pred_rf, df<span class="sc">$</span>y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction live  die
+      live 8862 1300
+      die     0   29
+                                          
+               Accuracy : 0.8724          
+                 95% CI : (0.8658, 0.8789)
+    No Information Rate : 0.8696          
+    P-Value [Acc &gt; NIR] : 0.2012          
+                                          
+                  Kappa : 0.0373          
+                                          
+ Mcnemar's Test P-Value : &lt;2e-16          
+                                          
+            Sensitivity : 1.00000         
+            Specificity : 0.02182         
+         Pos Pred Value : 0.87207         
+         Neg Pred Value : 1.00000         
+             Prevalence : 0.86959         
+         Detection Rate : 0.86959         
+   Detection Prevalence : 0.99715         
+      Balanced Accuracy : 0.51091         
+                                          
+       'Positive' Class : live            
+                                          </code></pre>
+</div>
+</div>
+</section>
+<section id="decision-tree-c4.5" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="decision-tree-c4.5"><span class="header-section-number">3.5</span> Decision Tree (C4.5)</h2>
+<p>Different decision tree algorithms have different feature selection methods, ID3 uses information gain, CART uses gini coefficient and C4.5 uses information gain rate. C5.0, which we use here, is a modified version of C4.5 to be more efficient and accurate.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(seed)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>train_control <span class="ot">&lt;-</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">"cv"</span>, <span class="at">number =</span> <span class="dv">10</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>model_tree <span class="ot">&lt;-</span> <span class="fu">train</span>(y <span class="sc">~</span> ., <span class="at">data =</span> df, <span class="at">method =</span> <span class="st">"C5.0"</span>, <span class="at">trControl =</span> train_control)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>pred_tree <span class="ot">&lt;-</span> <span class="fu">predict</span>(model_tree, df)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(pred_tree, df<span class="sc">$</span>y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction live  die
+      live 8862 1329
+      die     0    0
+                                          
+               Accuracy : 0.8696          
+                 95% CI : (0.8629, 0.8761)
+    No Information Rate : 0.8696          
+    P-Value [Acc &gt; NIR] : 0.5073          
+                                          
+                  Kappa : 0               
+                                          
+ Mcnemar's Test P-Value : &lt;2e-16          
+                                          
+            Sensitivity : 1.0000          
+            Specificity : 0.0000          
+         Pos Pred Value : 0.8696          
+         Neg Pred Value :    NaN          
+             Prevalence : 0.8696          
+         Detection Rate : 0.8696          
+   Detection Prevalence : 1.0000          
+      Balanced Accuracy : 0.5000          
+                                          
+       'Positive' Class : live            
+                                          </code></pre>
+</div>
+</div>
+</section>
+<section id="knn" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="knn"><span class="header-section-number">3.6</span> kNN</h2>
+<p>kNN method find k neighbors near the datapoints first. Class of new points is determined by classes of its neighbors. kNN is non-linear.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(seed)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>train_control <span class="ot">&lt;-</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">"cv"</span>, <span class="at">number =</span> <span class="dv">10</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>model_knn <span class="ot">&lt;-</span> <span class="fu">train</span>(y <span class="sc">~</span> ., <span class="at">data =</span> df, <span class="at">method =</span> <span class="st">"knn"</span>, <span class="at">trControl =</span> train_control)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>pred_knn <span class="ot">&lt;-</span> <span class="fu">predict</span>(model_knn, df)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(pred_knn, df<span class="sc">$</span>y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction live  die
+      live 8798 1200
+      die    64  129
+                                          
+               Accuracy : 0.876           
+                 95% CI : (0.8694, 0.8823)
+    No Information Rate : 0.8696          
+    P-Value [Acc &gt; NIR] : 0.02826         
+                                          
+                  Kappa : 0.1411          
+                                          
+ Mcnemar's Test P-Value : &lt; 2e-16         
+                                          
+            Sensitivity : 0.99278         
+            Specificity : 0.09707         
+         Pos Pred Value : 0.87998         
+         Neg Pred Value : 0.66839         
+             Prevalence : 0.86959         
+         Detection Rate : 0.86331         
+   Detection Prevalence : 0.98106         
+      Balanced Accuracy : 0.54492         
+                                          
+       'Positive' Class : live            
+                                          </code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="summary" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Summary</h1>
+<p>In this part, we summarize all the results above to reproduce the main result table in the original paper.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get all scores of a model in a function</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>get_all_scores <span class="ot">&lt;-</span> <span class="cf">function</span>(pred, <span class="at">y =</span> df<span class="sc">$</span>y){</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  acc <span class="ot">&lt;-</span> <span class="fu">accuracy</span>(pred, y)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  prec <span class="ot">&lt;-</span> <span class="fu">precision</span>(pred, y)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  rec <span class="ot">&lt;-</span> <span class="fu">recall</span>(pred, y)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  F1 <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">*</span>(prec<span class="sc">*</span>rec)<span class="sc">/</span>(prec<span class="sc">+</span>rec)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">c</span>(acc, prec, F1, rec))</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pred_list <span class="ot">&lt;-</span> <span class="fu">list</span>(pred_nb, pred_bn, pred_svm, </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                  pred_rf, pred_tree, pred_knn)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>summary_table <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(pred_list, get_all_scores))</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>summary_table <span class="ot">&lt;-</span> <span class="fu">round</span>(summary_table, <span class="dv">3</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(summary_table) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Accuracy"</span>, <span class="st">"Precision"</span>, <span class="st">"F1"</span>, <span class="st">"Recall"</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>summary_table <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">data.frame</span>(<span class="at">Model =</span> <span class="fu">c</span>(<span class="st">"NaiveBayes"</span>, <span class="st">"BayesNet"</span>, <span class="st">"SVM"</span>, <span class="st">"RandomForest"</span>, <span class="st">"DecisionTree"</span>, <span class="st">"kNN"</span>)), summary_table)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(summary_table, <span class="at">format =</span> <span class="st">"html"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Model</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Accuracy</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Precision</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">F1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Recall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">NaiveBayes</td>
+<td style="text-align: right;">0.867</td>
+<td style="text-align: right;">0.907</td>
+<td style="text-align: right;">0.925</td>
+<td style="text-align: right;">0.944</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">BayesNet</td>
+<td style="text-align: right;">0.880</td>
+<td style="text-align: right;">0.900</td>
+<td style="text-align: right;">0.934</td>
+<td style="text-align: right;">0.971</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">SVM</td>
+<td style="text-align: right;">0.870</td>
+<td style="text-align: right;">0.870</td>
+<td style="text-align: right;">0.930</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">RandomForest</td>
+<td style="text-align: right;">0.872</td>
+<td style="text-align: right;">0.872</td>
+<td style="text-align: right;">0.932</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">DecisionTree</td>
+<td style="text-align: right;">0.870</td>
+<td style="text-align: right;">0.870</td>
+<td style="text-align: right;">0.930</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">kNN</td>
+<td style="text-align: right;">0.876</td>
+<td style="text-align: right;">0.880</td>
+<td style="text-align: right;">0.933</td>
+<td style="text-align: right;">0.993</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+<p>Results are not totally the same as shown in the paper. The paper states that SVM renders the best accuracy score, all scores are rather close to 1, while ours is not the same. kNN is the best accordin to accuracy score. recall of SVM, random forest and decision tree is 1 (the same as the paper), while accuracy and precision could not reach 1. Possible reasons of the difference are listed below:</p>
+<ul>
+<li><p>There are different data preprocessing methods. As some models cannot handle NA values, what to do with NA recording matters. Details of preprocessing is not available in the paper, so we may get different data to fit the model.</p></li>
+<li><p>Seeds are also different. In our study, we fix the seed to ensure reproducibility. But the seed is not the same as the paper. In this cased, for each fold of the cross validation method, we got different subsets of data from the ones used in the paper.</p></li>
+<li><p>Different program languages also matter. The paper used WEKA, while we use R. Underlying implementation varies.</p></li>
+<li><p>Subtypes of the methods are not totally the same. For example, SMO version of SVM is used in the paper. However, we could not do exactly the same, instead we apply radial basis kernel. There are some ambiguity is the paper which prevents us from reproducing as well. As we known, NaiveBayes and BayesNet adopt different assumptions, but the original paper refer to both method as NaiveBayes.</p></li>
+</ul>
+<p>In conclusion, we cannot reproduce every details of the original paper without specification. However, results of our own can be reproduced since random seed is fixed and every detail is displayed in the chunks above. To reproduce all results at once, run <code>reproduce.r</code>.</p>
 </section>
 
 </main>
